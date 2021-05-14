@@ -1,0 +1,53 @@
+.row {
+    height: 41px;
+}
+
+.cell {
+    width: 40px;
+    height: 40px;
+    outline: 2px solid rgb(66, 74, 83);
+    display: inline-block;
+    margin-right: 1px;
+    background-color: rgb(220, 222, 255)
+}
+
+.cell-hover{
+    background-color: rgba(250, 0, 0, .6);
+}
+
+.cell-snake {
+    background-color: lightseagreen;
+}
+
+.cell-snake-head {
+    background-color: seagreen;
+}
+
+.cell-food {
+    background-color: rgba(240, 20, 60, 1);
+}
+
+.cell-path {
+    background-color: rgb(252, 252, 147);
+}
+
+#dropdown {
+    color: white;
+    display: inline-block;
+    margin: 10px 20px 15px 20px;
+}
+
+#generate{
+    display: inline;
+    font-size: large;
+    margin: 10px 20px 15px 20px
+}
+
+#seperate{
+    font-size: large;
+    display: inline;
+}
+
+#generate:hover {
+    color: lightgrey !important;
+}
