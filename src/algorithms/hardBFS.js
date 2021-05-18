@@ -12,8 +12,8 @@
     *    however many moves it takes the head of the snake to get to X, the tail of 
     *    the snake will have moved on and the path will be clear.
     * 
-    *    If that distance is greater, the snake will find a path with a length 1 greater
-    *    than the distance from X to the tail of the snake. If no path found, player wins.
+    *    If that distance is greater, the snake will find a path with a length at least 1 
+    *    greater than the distance from X to the tail of the snake. If no path found, player wins.
     */
 
 import mediumBFS from '../algorithms/mediumBFS'
@@ -137,7 +137,6 @@ function hardBFS (snake, target, nodeBoard, snakeCells){
                     snakeCopy.head = Object.create(temp)
                     snakeCopy.head.value = encCellClosestTail
                     toTar = mediumBFS(snakeCopy, target, nodeBoard, newSnakeCells)
-                    dfsPath.concat(toTar)
                 }
                 return dfsPath.concat(toTar)
             }

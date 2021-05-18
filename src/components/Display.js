@@ -32,7 +32,7 @@ import hardBFS from '../algorithms/hardBFS'
 import hamilton from '../algorithms/hamilton'
 
 import './css/display.css'
-import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 const BOARD_SIZE = 12
 const SNAKE_SPEED = 75
@@ -50,10 +50,14 @@ const Display = () => {
         new Node(cellVal, rowIdx, cellIdx))))))
   const[route, setRoute] = useState([STARTING_POS+1])
   const[running, setRunning] = useState(false)
-  const[show, setShow] = useState(false);
+  const[showInfo, setShowInfo] = useState(false)
+  const[showSnakeWin, setShowSnakeWin] = useState(false)
+  const[showUserWin, setShowUserWin] = useState(false)
   const[snake, setSnake] = useState(new LinkedList(STARTING_POS))
   const[snakeCells, setSnakeCells] = useState(new Set([STARTING_POS]))
   const[target, setTarget] = useState(STARTING_POS+1)
+
+  const cursor = !running ? "pointer" : "auto"
 
   // Fire snake movement when routes are set
   useEffect(() => {
@@ -73,15 +77,14 @@ const Display = () => {
   }
 
 
-  // Handles win cases of the game
+  // Handles win cases of the game and toggles popup
   const snakeWin = () => {
-    console.log("Snake Wins!")
+    handleShowSnakeWin()
     setExit(1)
     setRunning(false)
   }
-
   const playerWin = () => {
-    console.log("You Win!")      
+    handleShowUserWin()     
     setExit(1)
     setRunning(false)
   }
@@ -116,6 +119,7 @@ const Display = () => {
     nodeBoard[rowId][colId].isTarget = true
   }
 
+  // Sets route for snake to move along hamilton path
   const hamiltonSnakeToTarget = () => {
     let path = Array.from(hamiltonRoute)
     let pathToAppend = path.splice(0, path.indexOf(snake.head.value)+1)
@@ -133,7 +137,7 @@ const Display = () => {
     const newHead = new LinkedListNode(nextSnakeHeadVal)
     const newSnakeCells = new Set(snakeCells)
 
-    if(newSnakeCells.has(nextSnakeHeadVal)) playerWin()   
+    if(newSnakeCells.has(nextSnakeHeadVal) && nextSnakeHeadVal!==snake.tail.value) playerWin()   
     else{
       if(nextSnakeHeadVal===target){
         setTarget(-1)
@@ -157,6 +161,7 @@ const Display = () => {
     }, SNAKE_SPEED)
   }
 
+
   // Resets the state variables when game is to be reset
   const handleReset = () => {
     setNodeBoard( board.map((row, rowIdx) => (
@@ -169,19 +174,17 @@ const Display = () => {
     setExit(0)
   }
 
-  const cursor = !running ? "pointer" : "auto"
-
 
   // Functions for displaying modal popup and its contents
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleCloseInfo = () => setShowInfo(false)
+  const handleShowInfo = () => setShowInfo(true)
   const popupContent = () => {
     return(
       <div>
-        <span id="info" onClick={handleShow}>
+        <span id="info" onClick={handleShowInfo}>
           <FontAwesomeIcon icon={faInfoCircle}/>
         </span>
-        <Modal show={show} onHide={handleClose}>
+        <Modal show={showInfo} onHide={handleCloseInfo}>
           <Modal.Header closeButton>
             <Modal.Title>Welcome to Hungry Snake</Modal.Title>
           </Modal.Header>
@@ -193,12 +196,51 @@ const Display = () => {
             <span id="setting" style={{color: "gold"}}>Medium</span>: 
               Snake uses BFS while regarding its body as a "wall" to find a path to the food when a direct path exists.<br/>
             <span id="setting" style={{color: "tomato"}}>Hard</span>: 
-              If there is no direct BFS path to the food, Snake tries to find a path where its tail will be clear by the time the head arrives.<br/>
+              If there is no direct BFS path to the food, Snake will follow its tail until it can reach the food or uses DFS to find a path where its tail will be clear by the time the head arrives.<br/>
             <span id="setting" style={{color: "crimson"}}>Impossible</span>: 
               Snake will cyclically follow a Hamiltonian Path around the grid, visiting every grid cell only once on each cycle. Snake will always be able to reach food.<br/>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleClose}>
+            <Button variant="secondary" onClick={handleCloseInfo}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    )
+  }
+
+  // Functions for showing game end popup and its contents
+  const handleShowUserWin = () => setShowUserWin(true)
+  const handleShowSnakeWin = () => setShowSnakeWin(true)
+  const handleGameEndPopupClose = () => {
+    setShowUserWin(false)
+    setShowSnakeWin(false)
+  }
+  const handleGameEndPopupCloseAndReset = () => {
+    setShowUserWin(false)
+    setShowSnakeWin(false)
+    handleReset()
+  }
+  const gameEndPopup = () => {
+    return (
+      <div>
+        <Modal 
+          show={showUserWin || showSnakeWin} 
+          onHide={handleGameEndPopupClose} 
+          centered
+          size="sm"
+        >
+          <Modal.Header style={{textAlign:"center", margin:"0 auto"}}>
+            <Modal.Title>
+              {showUserWin ? "You win!" : showSnakeWin ? "Snake Wins!" : null}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Footer style={{textAlign:"center", margin:"0 auto"}}>
+          <Button variant="info" onClick={handleGameEndPopupCloseAndReset}>
+              Play Again
+            </Button>
+            <Button variant="secondary" onClick={handleGameEndPopupClose}>
               Close
             </Button>
           </Modal.Footer>
@@ -263,9 +305,10 @@ const Display = () => {
         ))}
       </div>
       <span>score: {snakeCells.size-2}</span>
+      {gameEndPopup()}
     </div>
   )
-}; 
+}
 
 class LinkedList{
   constructor(value) {
