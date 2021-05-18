@@ -1,5 +1,6 @@
 const BOARD_SIZE = 12
 
+// Main running function for easyBFS - basic BFS implementation
 function easyBFS (snake, target, nodeBoard){
     let headCoordinate = findHeadRC(snake.head.value)
     let rowId = headCoordinate[0], colId = headCoordinate[1]
@@ -35,6 +36,8 @@ function easyBFS (snake, target, nodeBoard){
     return path
 }
 
+// Helper function to prevent the snake from moving backward when
+// food is placed "behind" the head.
 function preventReverse(snake, visited){
     let temp = snake.tail
     let revSnake = []
@@ -52,6 +55,7 @@ function preventReverse(snake, visited){
     }
 }
 
+// Finds the neighbors of a cell for BFS
 function findNeighbors(node, nodeBoard){
     let neighbors = []
     let potentialNeighbor
@@ -74,7 +78,8 @@ function findNeighbors(node, nodeBoard){
     return neighbors
 }
 
-
+// Find the row and column of a given cell, so its place can be determined
+// in the nodeBoard
 function findHeadRC(cellVal){
     let rowId = Math.floor((cellVal-1)/BOARD_SIZE)
     let colId = cellVal%BOARD_SIZE===0 ? BOARD_SIZE-1 : cellVal%BOARD_SIZE-1

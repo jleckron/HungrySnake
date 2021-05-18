@@ -1,9 +1,11 @@
 const BOARD_SIZE = 12
 
+// Main running function for mediumBFS - BFS implementation
+// Only looks at cells popped out of the queue that are not already
+//  visited AND not a part of the current snake
 function mediumBFS (snake, target, nodeBoard, snakeCells){
     let headCoordinate = findHeadRC(snake.head.value)
     let rowId = headCoordinate[0], colId = headCoordinate[1]
-
     let visited = new Array(Math.pow(BOARD_SIZE, 2)).fill(false)
     visited[snake.head.value] = true
 
@@ -34,6 +36,7 @@ function mediumBFS (snake, target, nodeBoard, snakeCells){
     return path
 }
 
+// Finds neighbors of a cell for BFS
 function findNeighbors(node, nodeBoard){
     let neighbors = []
     let potentialNeighbor
@@ -56,7 +59,8 @@ function findNeighbors(node, nodeBoard){
     return neighbors
 }
 
-
+// Find the row and column of a given cell, so its place can be determined
+// in the nodeBoard
 function findHeadRC(cellVal){
     let rowId = Math.floor((cellVal-1)/BOARD_SIZE)
     let colId = cellVal%BOARD_SIZE===0 ? BOARD_SIZE-1 : cellVal%BOARD_SIZE-1

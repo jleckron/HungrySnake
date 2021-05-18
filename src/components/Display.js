@@ -19,9 +19,12 @@
   Impossible: Hamiltonian Cycle (Snake visits every node exactly once)
 */
 import React, { useState, useEffect } from 'react'
-import Dropdown from 'react-bootstrap/Dropdown'
 import Button from 'react-bootstrap/Button'
 import ButtonGroup from 'react-bootstrap/ButtonGroup'
+import Dropdown from 'react-bootstrap/Dropdown'
+import Modal from 'react-bootstrap/Modal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faInfoCircle } from '@fortawesome/free-solid-svg-icons'
 
 import easyBFS from '../algorithms/easyBFS'
 import mediumBFS from '../algorithms/mediumBFS'
@@ -36,26 +39,23 @@ const SNAKE_SPEED = 75
 const STARTING_POS = 75
 
 const Display = () => {
+  const[algorithm, setAlgorithm] = useState("")
   const[board] = useState(createBoard(BOARD_SIZE))
+  const[cellHover, setCellHover] = useState(-1)
+  const[exit, setExit] = useState(0)
+  const[hamiltonRoute, setHamiltonRoute] = useState([])
   const[nodeBoard, setNodeBoard] = useState(
     board.map((row, rowIdx) => (
       row.map((cellVal, cellIdx) => (
         new Node(cellVal, rowIdx, cellIdx))))))
-  const[snakeCells, setSnakeCells] = useState(new Set([STARTING_POS]))
-  const[snake, setSnake] = useState(new LinkedList(STARTING_POS))
-  const[target, setTarget] = useState(STARTING_POS+1)
-  const[cellHover, setCellHover] = useState(-1)
   const[route, setRoute] = useState([STARTING_POS+1])
-  const[hamiltonRoute, setHamiltonRoute] = useState([])
-  const[exit, setExit] = useState(0)
   const[running, setRunning] = useState(false)
-  const[algorithm, setAlgorithm] = useState("")
+  const[show, setShow] = useState(false);
+  const[snake, setSnake] = useState(new LinkedList(STARTING_POS))
+  const[snakeCells, setSnakeCells] = useState(new Set([STARTING_POS]))
+  const[target, setTarget] = useState(STARTING_POS+1)
 
-  // Handles setting the state of the highlighted cell
-  const toggleHover = (cellVal) => {
-    setCellHover(cellVal)
-  }
-
+  // Fire snake movement when routes are set
   useEffect(() => {
     if(target>0 && exit===0) moveSnake()
     if(target===-1) setRunning(false)
@@ -65,6 +65,13 @@ const Display = () => {
     if(target>0 && exit===0) hamiltonSnakeToTarget()
     if(target===-1) setRunning(false)
   },[hamiltonRoute])
+
+   
+  // Handles setting the state of the highlighted cell
+  const toggleHover = (cellVal) => {
+    setCellHover(cellVal)
+  }
+
 
   // Handles win cases of the game
   const snakeWin = () => {
@@ -78,6 +85,7 @@ const Display = () => {
     setExit(1)
     setRunning(false)
   }
+
 
   // Function called on click, triggers path finding and snake movement
   // If no optimal path is found by easyBFS, it will run the shortest path through itself to end game, 
@@ -125,15 +133,15 @@ const Display = () => {
     const newHead = new LinkedListNode(nextSnakeHeadVal)
     const newSnakeCells = new Set(snakeCells)
 
-    if(nextSnakeHeadVal===target){
-      setTarget(-1)
-    }
-    else{
-      newSnakeCells.delete(snake.tail.value)
-      snake.tail = snake.tail.next
-    }
     if(newSnakeCells.has(nextSnakeHeadVal)) playerWin()   
     else{
+      if(nextSnakeHeadVal===target){
+        setTarget(-1)
+      }
+      else{
+        newSnakeCells.delete(snake.tail.value)
+        snake.tail = snake.tail.next
+      }
       const currentHead = snake.head
       snake.head = newHead
       currentHead.next = newHead
@@ -149,6 +157,7 @@ const Display = () => {
     }, SNAKE_SPEED)
   }
 
+  // Resets the state variables when game is to be reset
   const handleReset = () => {
     setNodeBoard( board.map((row, rowIdx) => (
                    row.map((cellVal, cellIdx) => (
@@ -162,8 +171,49 @@ const Display = () => {
 
   const cursor = !running ? "pointer" : "auto"
 
+
+  // Functions for displaying modal popup and its contents
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+  const popupContent = () => {
+    return(
+      <div>
+        <span id="info" onClick={handleShow}>
+          <FontAwesomeIcon icon={faInfoCircle}/>
+        </span>
+        <Modal show={show} onHide={handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Welcome to Hungry Snake</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <span id="instruction">Place food on the grid for the snake to try and eat</span><br/>
+            <span id="instruction">Aim for as low a score as possible!</span><br/>
+            <span id="setting" style={{color: "limegreen"}}>Easy</span>: 
+              Snake uses BFS with no self detection to find a path to the food.<br/>
+            <span id="setting" style={{color: "gold"}}>Medium</span>: 
+              Snake uses BFS while regarding its body as a "wall" to find a path to the food when a direct path exists.<br/>
+            <span id="setting" style={{color: "tomato"}}>Hard</span>: 
+              If there is no direct BFS path to the food, Snake tries to find a path where its tail will be clear by the time the head arrives.<br/>
+            <span id="setting" style={{color: "crimson"}}>Impossible</span>: 
+              Snake will cyclically follow a Hamiltonian Path around the grid, visiting every grid cell only once on each cycle. Snake will always be able to reach food.<br/>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </div>
+    )
+  }
+
+  // Returns page elemens to be rendered
   return (
     <div>
+      <div id="title"> 
+        <span>Can you beat the hungry snake?</span>
+        {popupContent()}
+      </div>
       <div>
         <div id="dropdown">
           <Dropdown as={ButtonGroup}>
@@ -185,7 +235,7 @@ const Display = () => {
           |
         </div>
         <div
-          id="generate"
+          id="reset"
           style={{cursor: cursor}}
           onClick={() => handleReset()}>
           Reset Game
@@ -204,7 +254,7 @@ const Display = () => {
                 : snakeCells.has(cellVal) ? 'cell-snake'
                 : cellVal===target ? 'cell-food'
                 : cellVal===cellHover ? 'cell-hover'
-                : route.includes(cellVal)? 'cell-path'
+                : route.includes(cellVal)? 'cell'
                 : ''}`}
               >
             </div>
@@ -217,18 +267,19 @@ const Display = () => {
   )
 }; 
 
-class LinkedListNode {
-  constructor(value) {
-    this.value = value
-    this.next = null
-  }
-}
-
 class LinkedList{
   constructor(value) {
     const node = new LinkedListNode(value)
     this.head = node
     this.tail = node
+  }
+}
+
+
+class LinkedListNode {
+  constructor(value) {
+    this.value = value
+    this.next = null
   }
 }
 
