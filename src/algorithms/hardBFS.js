@@ -105,7 +105,7 @@ function hardBFS (snake, target, nodeBoard, snakeCells){
             // moves it takes the head to arrive
             else{
                 let exit = 0
-                let dfsPath = []
+                let dfsPath = [], encCellToTarget = []
                 //DFS function to find path with length at least 1 more than dist from breakthrough to tail
                 var dfs = function(cell, currentLength, locPath){
                     if(currentLength>=distFromTail+1 && cell.value===encCellClosestTail){
@@ -122,10 +122,7 @@ function hardBFS (snake, target, nodeBoard, snakeCells){
                         }
                     })
                 }
-                let headCoordinate = findHeadRC(snake.head.value)
-                let rowId = headCoordinate[0], colId = headCoordinate[1]
                 dfs(nodeBoard[rowId][colId], 0, dfsPath)
-                let toTar = []
                 if(dfsPath.length){
                     let temp = snake.tail
                     newSnakeCells.add(encCellClosestTail)
@@ -136,15 +133,15 @@ function hardBFS (snake, target, nodeBoard, snakeCells){
                     let snakeCopy = Object.create(snake)
                     snakeCopy.head = Object.create(temp)
                     snakeCopy.head.value = encCellClosestTail
-                    toTar = mediumBFS(snakeCopy, target, nodeBoard, newSnakeCells)
+                    encCellToTarget = mediumBFS(snakeCopy, target, nodeBoard, newSnakeCells)
                 }
-                return dfsPath.concat(toTar)
+                if(dfsPath.length===0) return pathToEncountered
+                return dfsPath.concat(encCellToTarget)
             }
         }
     }
     return path
 }
-
 
 // Helper function that finds the cell in encounteredCells which is
 // closest to the tail of the snake. 
