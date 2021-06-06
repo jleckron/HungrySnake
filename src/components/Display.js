@@ -189,7 +189,7 @@ const Display = () => {
             <Modal.Title>Welcome to Hungry Snake</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <span id="instruction">Place food on the grid for the snake to try and eat</span><br/>
+            <span id="instruction">Place food on the grid for the snake to try and eat.</span><br/>
             <span id="instruction">Aim for as low a score as possible!</span><br/>
             <span id="setting" style={{color: "limegreen"}}>Easy</span>: 
               Snake uses BFS with no self detection to find a path to the food.<br/>
