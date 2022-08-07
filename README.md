@@ -1,4 +1,4 @@
-# Hungry Snake
+# [Hungry Snake](https://jleckron.github.io/HungrySnake/)
 Place food on the grid for the snake to try and eat.
 Aim for as low a score as possible!
 
